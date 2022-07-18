@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "295139217283",
+    "project_id": "junilo",
+    "storage_bucket": "junilo.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:295139217283:android:c44b336b8d1f3b9b6070b6",
+        "android_client_info": {
+          "package_name": "com.example.junilo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "295139217283-ont9gc1pvh5pemgkdhl7rurdu566gbee.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDQ6qTLjGp2K7cjFKxPL9HkDTxL4ZY9JXs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "295139217283-ont9gc1pvh5pemgkdhl7rurdu566gbee.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
