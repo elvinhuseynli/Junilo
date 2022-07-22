@@ -2,6 +2,8 @@
 <resources>
     <array name="preloaded_fonts" translatable="false">
         <item>@font/alata</item>
+        <item>@font/amarante</item>
         <item>@font/carter_one</item>
+        <item>@font/concert_one</item>
     </array>
 </resources>

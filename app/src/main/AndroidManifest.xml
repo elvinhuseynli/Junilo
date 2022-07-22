@@ -7,14 +7,37 @@
 
     <application
         android:allowBackup="true"
+        android:fitsSystemWindows="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:usesCleartextTraffic="false"
-        android:fitsSystemWindows="false"
+        android:networkSecurityConfig="@xml/network_security_config"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:networkSecurityConfig="@xml/network_security_config"
-        android:theme="@style/Theme.Junilo">
+        android:theme="@style/Theme.Junilo"
+        android:usesCleartextTraffic="false">
+
+        <activity
+            android:name=".ChatActivity"
+            android:windowSoftInputMode="adjustResize"
+            android:exported="false" />
+        <activity
+            android:name=".UsersActivity"
+            android:exported="false" />
+        <activity
+            android:name=".SplashScreen"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".RegistrationPage3"
+            android:exported="false" />
+        <activity
+            android:name=".RegistrationPage2"
+            android:exported="false" />
         <activity
             android:name=".PasswordRecovery"
             android:exported="false" />
@@ -24,7 +47,8 @@
             <intent-filter>
                 <data
                     android:host="junilo.firebaseapp.com"
-                    android:scheme="https" /></intent-filter>
+                    android:scheme="https" />
+            </intent-filter>
         </activity>
         <activity
             android:name=".ForgotPassword"
@@ -40,31 +64,11 @@
                 android:value=".LoginPage" />
         </activity>
         <activity
-            android:name=".Database"
+            android:name=".LoginPage"
             android:exported="false" />
         <activity
-            android:name=".LoginPage"
-            android:exported="false">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
-        </activity>
-        <activity
             android:name=".RegistrationPage"
-            android:exported="false">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
-        </activity>
-        <activity
-            android:name=".MainActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+            android:exported="false" />
 
         <meta-data
             android:name="preloaded_fonts"

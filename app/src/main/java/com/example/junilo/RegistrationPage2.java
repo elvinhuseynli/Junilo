@@ -31,7 +31,7 @@ import com.hbb20.CountryCodePicker;
 
 import java.util.concurrent.TimeUnit;
 
-public class PhoneVerification extends AppCompatActivity {
+public class RegistrationPage2 extends AppCompatActivity {
 
     CountryCodePicker ccp;
     EditText phoneNumber;
@@ -39,19 +39,24 @@ public class PhoneVerification extends AppCompatActivity {
     PinView otpCode;
     Button sendButton;
     PhoneAuthProvider.OnVerificationStateChangedCallbacks mCallbacks;
-    String mVerificationId, code, phoneDB;
+    String mVerificationId, code, phoneDB, name, username, password;
     int taskSuccessful = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_phone);
+        setContentView(R.layout.activity_registration_page2);
 
         Intent startIntent = getIntent();
         phoneNumber = (EditText) findViewById(R.id.editTextPhone3);
         ccp = (CountryCodePicker) findViewById(R.id.countryCodePicker2);
         sendButton = (Button) findViewById(R.id.button19);
         otpCode = (PinView) findViewById(R.id.pinView);
+
+        Bundle extras = startIntent.getExtras();
+        name = extras.getString("name");
+        username = extras.getString("username");
+        password = extras.getString("password");
 
         phoneAuth = FirebaseAuth.getInstance();
 
@@ -75,7 +80,7 @@ public class PhoneVerification extends AppCompatActivity {
 
             @Override
             public void onVerificationFailed(FirebaseException e) {
-                Toast.makeText(PhoneVerification.this, e.getMessage(), Toast.LENGTH_LONG).show();
+                Toast.makeText(RegistrationPage2.this, e.getMessage(), Toast.LENGTH_LONG).show();
             }
 
             @Override
@@ -87,6 +92,7 @@ public class PhoneVerification extends AppCompatActivity {
     }
 
     public void checkDatabase() {
+
         phoneDB = (new StringBuilder().append(ccp.getSelectedCountryCodeWithPlus()).append(phoneNumber.getText().toString())).toString();
         FirebaseFirestore database = FirebaseFirestore.getInstance();
         Query query = database.collection("users")
@@ -95,12 +101,12 @@ public class PhoneVerification extends AppCompatActivity {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                 if(task.isSuccessful()){
-                    if(task.getResult().size()!=0){
+                    if(task.getResult().size()==0){
                         sendOtpCode(phoneDB);
                     }
                     else{
-                        AlertDialog.Builder regDialog = new AlertDialog.Builder(PhoneVerification.this);
-                        regDialog.setMessage("Phone number is not registered in the system");
+                        AlertDialog.Builder regDialog = new AlertDialog.Builder(RegistrationPage2.this);
+                        regDialog.setMessage("Phone number already exists");
                         regDialog.setTitle("Alert");
                         regDialog.setCancelable(false);
                         regDialog.setPositiveButton("OK",
@@ -136,8 +142,12 @@ public class PhoneVerification extends AppCompatActivity {
 
     public void checkCode() {
         String enteredCode = otpCode.getText().toString();
-        PhoneAuthCredential credential = PhoneAuthProvider.getCredential(mVerificationId,enteredCode);
-        signInWithCredential(credential);
+        if(enteredCode.isEmpty())
+            taskSuccessful = 1;
+        else {
+            PhoneAuthCredential credential = PhoneAuthProvider.getCredential(mVerificationId, enteredCode);
+            signInWithCredential(credential);
+        }
     }
 
     private void signInWithCredential(PhoneAuthCredential credential) {
@@ -148,20 +158,23 @@ public class PhoneVerification extends AppCompatActivity {
                     taskSuccessful=1;
                     finish();
                 } else
-                    Toast.makeText(PhoneVerification.this, task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                    Toast.makeText(RegistrationPage2.this, task.getException().getMessage(), Toast.LENGTH_LONG).show();
             }
         });
     }
 
-    public void recoveryPageTransition(View view) {
-        Intent recoveryIntent = new Intent(this, PasswordRecovery.class);
+    public void loginPageTransition(View view) {
+        Intent loginIntent = new Intent(this, RegistrationPage3.class);
         checkCode();
         if(taskSuccessful == 0) {
-            recoveryIntent.putExtra("phone", phoneDB);
-            startActivity(recoveryIntent);
+            loginIntent.putExtra("phone", phoneDB);
+            loginIntent.putExtra("name", name);
+            loginIntent.putExtra("username", username);
+            loginIntent.putExtra("password", password);
+            startActivity(loginIntent);
         }
         else{
-            AlertDialog.Builder regDialog = new AlertDialog.Builder(PhoneVerification.this);
+            AlertDialog.Builder regDialog = new AlertDialog.Builder(RegistrationPage2.this);
             regDialog.setMessage("Invalid Login. Try again");
             regDialog.setTitle("Alert");
             regDialog.setCancelable(false);

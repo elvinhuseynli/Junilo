@@ -1,5 +1,6 @@
 package com.example.junilo;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
@@ -13,12 +14,19 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QuerySnapshot;
 
 public class PasswordRecovery extends AppCompatActivity {
 
     String phone, email, password1, password2;
     EditText pw1, pw2;
-    Database database;
     Boolean pw1Visible=false, pw2Visible=false;
     Button confirmButton;
     int errorExists = 0;
@@ -37,8 +45,6 @@ public class PasswordRecovery extends AppCompatActivity {
         pw2 = (EditText) findViewById(R.id.editTextTextPassword5);
 
         confirmButton = (Button) findViewById(R.id.button13);
-
-        database = new Database(this);
 
         pw1.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -128,64 +134,100 @@ public class PasswordRecovery extends AppCompatActivity {
         return errorExists;
     }
 
-    public int recoverPasswordEmail() {
+    public void recoverPasswordEmail() {
         if(checkValidity() == 0) {
-            Boolean x = database.updatePasswordEmail(password1, email);
-            if(!x){
-                AlertDialog.Builder regDialog = new AlertDialog.Builder(PasswordRecovery.this);
-                regDialog.setMessage("New password cannot be your old passwords");
-                regDialog.setTitle("Alert");
-                regDialog.setCancelable(false);
-                regDialog.setPositiveButton("OK",
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int nom) {
-                                dialog.cancel();
+            FirebaseFirestore database = FirebaseFirestore.getInstance();
+            Query query = database.collection("users")
+                    .whereEqualTo("email", email);
+            query.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                    if(task.isSuccessful()) {
+                        if(task.getResult().size()!=0) {
+                            DocumentSnapshot documentSnapshot = task.getResult().getDocuments().get(0);
+                            String id = documentSnapshot.getId();
+                            String pass = documentSnapshot.getString("password");
+                            if (!pass.equals(password1)) {
+                                database.collection("users")
+                                        .document(id).update("password", password1);
+                                Intent loginIntent = new Intent(PasswordRecovery.this, LoginPage.class);
+                                startActivity(loginIntent);
                             }
-                        });
-                AlertDialog dialog = regDialog.create();
-                dialog.show();
-                return 1;
-            }
-            return 0;
+                            else {
+                                AlertDialog.Builder regDialog = new AlertDialog.Builder(PasswordRecovery.this);
+                                regDialog.setMessage("Your new password cannot be same as old one");
+                                regDialog.setTitle("Error");
+                                regDialog.setCancelable(false);
+                                regDialog.setPositiveButton("OK",
+                                        new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int nom) {
+                                                dialog.cancel();
+                                            }
+                                        });
+                                AlertDialog dialog = regDialog.create();
+                                dialog.show();
+                            }
+                        }
+                        else{
+                            //Ignore
+                        }
+                    }
+                }
+            });
         }
-        return 1;
     }
 
-    public int recoverPasswordPhone() {
+    public void recoverPasswordPhone() {
         if(checkValidity() == 0) {
-            Boolean x = database.updatePasswordPhone(password1, phone);
-            if(!x){
-                AlertDialog.Builder regDialog = new AlertDialog.Builder(PasswordRecovery.this);
-                regDialog.setMessage("New password cannot be your old passwords");
-                regDialog.setTitle("Alert");
-                regDialog.setCancelable(false);
-                regDialog.setPositiveButton("OK",
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int nom) {
-                                dialog.cancel();
+            FirebaseFirestore database = FirebaseFirestore.getInstance();
+            Query query = database.collection("users")
+                    .whereEqualTo("phone", phone);
+            query.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                    if(task.isSuccessful()) {
+                        if(task.getResult().size()!=0) {
+                            DocumentSnapshot documentSnapshot = task.getResult().getDocuments().get(0);
+                            String id = documentSnapshot.getId();
+                            String pass = documentSnapshot.getString("password");
+                            if (!pass.equals(password1)) {
+                                database.collection("users")
+                                        .document(id).update("password", password1);
+                                Intent loginIntent = new Intent(PasswordRecovery.this, LoginPage.class);
+                                startActivity(loginIntent);
                             }
-                        });
-                AlertDialog dialog = regDialog.create();
-                dialog.show();
-                return 1;
-            }
-            return 0;
+                            else {
+                                AlertDialog.Builder regDialog = new AlertDialog.Builder(PasswordRecovery.this);
+                                regDialog.setMessage("Your new password cannot be same as old one");
+                                regDialog.setTitle("Error");
+                                regDialog.setCancelable(false);
+                                regDialog.setPositiveButton("OK",
+                                        new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int nom) {
+                                                dialog.cancel();
+                                            }
+                                        });
+                                AlertDialog dialog = regDialog.create();
+                                dialog.show();
+                            }
+                        }
+                        else{
+                            //Ignore
+                        }
+                    }
+                }
+            });
         }
-        return 1;
     }
 
     public void loginPageTransition(View view) {
-        Intent loginIntent = new Intent(this, LoginPage.class);
-        int okay = 0;
         if(email!=null) {
-            okay = recoverPasswordEmail();
+            recoverPasswordEmail();
         }
         else {
-            okay = recoverPasswordPhone();
+            recoverPasswordPhone();
         }
-        if(okay==0)
-            startActivity(loginIntent);
     }
 }

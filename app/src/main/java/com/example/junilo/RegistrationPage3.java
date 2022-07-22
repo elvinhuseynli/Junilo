@@ -2,6 +2,7 @@ package com.example.junilo;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -9,6 +10,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+
 import com.chaos.view.PinView;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -16,20 +18,31 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.util.HashMap;
 import java.util.Objects;
 
-public class EmailVerification extends AppCompatActivity {
+public class RegistrationPage3 extends AppCompatActivity {
 
     EditText emailET;
-    String email, subject="Verification message", message, emailDB;
+    String email, subject="Verification message", message, emailDB, name, username, phone, password;
     Button sendButton;
     PinView code;
+    PreferenceManager preferenceManager;
     JavaMailAPI javaMailAPI;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_email);
+        setContentView(R.layout.activity_registration_page3);
+
+        Intent startIntent = getIntent();
+        Bundle extras = startIntent.getExtras();
+        name = extras.getString("name");
+        username = extras.getString("username");
+        phone = extras.getString("phone");
+        password = extras.getString("password");
+
+        preferenceManager = new PreferenceManager(getApplicationContext());
 
         emailET = (EditText) findViewById(R.id.editTextTextEmailAddress2);
         sendButton = (Button) findViewById(R.id.button7);
@@ -44,8 +57,6 @@ public class EmailVerification extends AppCompatActivity {
                 sendEmail();
             }
         });
-
-        Intent startIntent = getIntent();
     }
 
     public int checkCode() {
@@ -65,13 +76,13 @@ public class EmailVerification extends AppCompatActivity {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                 if(task.isSuccessful()) {
-                    if(task.getResult().size()!=0){
-                        javaMailAPI = new JavaMailAPI(EmailVerification.this, email, subject, message);
+                    if(task.getResult().size()==0){
+                        javaMailAPI = new JavaMailAPI(RegistrationPage3.this, email, subject, message);
                         javaMailAPI.execute();
                     }
                     else{
-                        AlertDialog.Builder regDialog = new AlertDialog.Builder(EmailVerification.this);
-                        regDialog.setMessage("Email address is not registered in the system");
+                        AlertDialog.Builder regDialog = new AlertDialog.Builder(RegistrationPage3.this);
+                        regDialog.setMessage("Email address already exists");
                         regDialog.setTitle("Alert");
                         regDialog.setCancelable(false);
                         regDialog.setPositiveButton("OK",
@@ -89,26 +100,26 @@ public class EmailVerification extends AppCompatActivity {
         });
     }
 
-    public void recoveryPageTransition(View view) {
-        Intent recoveryIntent = new Intent(this, PasswordRecovery.class);
+    public void loginPageTransition(View view) {
         if(checkCode() == 0) {
-            recoveryIntent.putExtra("email", email);
-            startActivity(recoveryIntent);
-        }
-        else{
-            AlertDialog.Builder phoneDialog = new AlertDialog.Builder(EmailVerification.this);
-            phoneDialog.setMessage("Invalid Login. Try again");
-            phoneDialog.setTitle("Alert");
-            phoneDialog.setCancelable(false);
-            phoneDialog.setPositiveButton("OK",
-                    new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int nom) {
-                            dialog.cancel();
-                        }
+            FirebaseFirestore database = FirebaseFirestore.getInstance();
+            HashMap<String, String> user = new HashMap<>();
+            user.put("name", name);
+            user.put("username", username);
+            user.put("password", password);
+            user.put("phone", phone);
+            user.put("email", emailDB);
+            database.collection("users").add(user)
+                    .addOnSuccessListener(documentReference -> {
+                        preferenceManager.putBoolean("isSignedIn", true);
+                        preferenceManager.putString("name", name);
+                        preferenceManager.putString("userId", documentReference.getId());
+                        Intent loginIntent = new Intent(RegistrationPage3.this, LoginPage.class);
+                        startActivity(loginIntent);
+                    })
+                    .addOnFailureListener(exception -> {
+                        //Failure
                     });
-            AlertDialog dialog = phoneDialog.create();
-            dialog.show();
         }
     }
 }

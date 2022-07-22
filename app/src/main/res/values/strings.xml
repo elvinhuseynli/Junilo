@@ -5,7 +5,7 @@
     <string name="selection_text">Select the way to repair your account: Email or Phone Verification</string>
     <string name="opt_code">Enter your phone number to get an OPT code</string>
     <string name="email_code">Enter your email address to get a link for verification</string>
-    <string name="name">[a-zA-Z]+</string>
+    <string name="name">^[a-zA-Z\\s]+</string>
     <string name="email">^(.+)@(.+)$</string>
     <string name="password">^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,20}$</string>
     <string name="password2">^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,20}$</string>

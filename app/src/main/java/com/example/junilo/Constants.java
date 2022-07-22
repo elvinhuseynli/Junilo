@@ -1,7 +1,12 @@
 package com.example.junilo;
 
 public class Constants {
-    public static String APP_ID = "213559b6a2007920";
-    public static String REGION = "eu";
-    public static String AUTH_KEY = "d88fd8fc10ee7aeaac0a8d8f9dfd50fdcb7c03e2";
+    public static final String KEY_COLLECTION_USERS = "users";
+    public static final String KEY_NAME = "name";
+    public static final String KEY_EMAIL = "email";
+    public static final String KEY_PASSWORD = "password";
+    public static final String KEY_PREFERENCE_NAME = "chatAppPreference";
+    public static final String KEY_IS_SIGNED_IN = "isSignedIn";
+    public static final String KEY_USER_ID = "userId";
+    public static final String KEY_FCM_TOKEN = "fcmToken";
 }

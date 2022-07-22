@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#ffe400"
-    tools:context=".EmailVerification">
+    tools:context=".RegistrationPage3">
 
     <Button
         android:id="@+id/button10"
@@ -13,9 +13,9 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="80dp"
         android:backgroundTint="#000000"
-        android:onClick="recoveryPageTransition"
+        android:onClick="loginPageTransition"
+        app:cornerRadius = "@dimen/_8sdp"
         android:text="Confirm"
-        app:cornerRadius="@dimen/_8sdp"
         android:textColor="#FFFFFF"
         android:textColorHighlight="#FFFFFF"
         android:textColorHint="#FFFFFF"
@@ -32,10 +32,10 @@
         android:layout_height="59dp"
         android:layout_marginTop="32dp"
         android:background="#FFBE01"
-        android:textSize="24sp"
-        android:textStyle="bold"
         android:cursorVisible="true"
         android:inputType="number"
+        android:textSize="24sp"
+        android:textStyle="bold"
         app:cursorColor="@color/black"
         app:itemCount="6"
         app:itemHeight="60dp"
@@ -54,7 +54,7 @@
         android:backgroundTint="#000000"
         android:fontFamily="sans-serif-black"
         android:text="Send Code"
-        app:cornerRadius="@dimen/_8sdp"
+        app:cornerRadius = "@dimen/_8sdp"
         android:textColor="#FFFFFF"
         android:textColorHighlight="#FFFFFF"
         android:textColorHint="#FFFFFF"
@@ -67,12 +67,12 @@
 
     <EditText
         android:id="@+id/editTextTextEmailAddress2"
-        android:layout_width="360dp"
-        android:layout_height="56dp"
+        android:layout_width="380dp"
+        android:layout_height="60dp"
         android:layout_marginTop="20dp"
-        android:textColorHint="#98000000"
         android:background="@drawable/border"
         android:backgroundTint="#FFBE01"
+        android:textColorHint="#98000000"
         android:drawableLeft="@drawable/ic_baseline_email_24"
         android:drawablePadding="10dp"
         android:ems="10"

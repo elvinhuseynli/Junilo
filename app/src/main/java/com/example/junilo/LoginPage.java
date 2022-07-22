@@ -1,5 +1,6 @@
 package com.example.junilo;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
@@ -13,12 +14,19 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.EditText;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QuerySnapshot;
+
 public class LoginPage extends AppCompatActivity {
 
     EditText username, password;
     Boolean passwordVisible = false;
-    Database database;
-    String usernameDB;
+    PreferenceManager preferenceManager;
+    String usernameDB, passwordDB;
     int errorExists = 0;
 
     @SuppressLint("ClickableViewAccessibility")
@@ -29,8 +37,11 @@ public class LoginPage extends AppCompatActivity {
 
         Intent startIntent = getIntent();
 
-        database = new Database(this);
-
+        preferenceManager = new PreferenceManager(getApplicationContext());
+//        if(preferenceManager.getBoolean(Constants.KEY_IS_SIGNED_IN)) {
+//            Intent mainIntent = new Intent(LoginPage.this, MainPage.class);
+//            startActivity(mainIntent);
+//        }
         username = (EditText) findViewById(R.id.editTextTextPersonName3);
         password = (EditText) findViewById(R.id.editTextTextPassword2);
 
@@ -72,31 +83,46 @@ public class LoginPage extends AppCompatActivity {
         return errorExists;
     }
 
-    public int checkDatabase() {
+    public void checkDatabase() {
         usernameDB = username.getText().toString();
-        String passwordDB = password.getText().toString();
-        System.out.println(usernameDB);
-        System.out.println(passwordDB);
-
-        Boolean checkUser = database.checkUsernamePassword(usernameDB, passwordDB);
-        if(checkUser)
-            return 0;
-        else if(checkValidity() == 0){
-            AlertDialog.Builder regDialog = new AlertDialog.Builder(LoginPage.this);
-            regDialog.setMessage("Invalid Login. Try again");
-            regDialog.setTitle("Alert");
-            regDialog.setCancelable(false);
-            regDialog.setPositiveButton("OK",
-                    new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int nom) {
-                            dialog.cancel();
+        passwordDB = password.getText().toString();
+        FirebaseFirestore database = FirebaseFirestore.getInstance();
+        Query query = database.collection("users")
+                .whereEqualTo("username", usernameDB)
+                .whereEqualTo("password", passwordDB);
+        query.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if(task.isSuccessful()) {
+                            if(task.getResult().size()!=0) {
+                                DocumentSnapshot documentSnapshot = task.getResult().getDocuments().get(0);
+                                preferenceManager.putBoolean("isSignedIn", true);
+                                preferenceManager.putString("name", documentSnapshot.getString("name"));
+                                preferenceManager.putString("userId", documentSnapshot.getId());
+                                Intent mainIntent = new Intent(LoginPage.this, MainPage.class);
+                                mainIntent.putExtra("userId", documentSnapshot.getId());
+                                mainIntent.putExtra("email", documentSnapshot.getString("email"));
+                                mainIntent.putExtra("name", documentSnapshot.getString("name"));
+                                startActivity(mainIntent);
+                            }
+                            else{
+                                AlertDialog.Builder regDialog = new AlertDialog.Builder(LoginPage.this);
+                                regDialog.setMessage("Invalid Login. Try again");
+                                regDialog.setTitle("Alert");
+                                regDialog.setCancelable(false);
+                                regDialog.setPositiveButton("OK",
+                                        new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int nom) {
+                                                dialog.cancel();
+                                            }
+                                        });
+                                AlertDialog dialog = regDialog.create();
+                                dialog.show();
+                            }
                         }
-                    });
-            AlertDialog dialog = regDialog.create();
-            dialog.show();
-        }
-        return 1;
+                    }
+                });
     }
 
     public void forgotPassword(View view) {
@@ -104,12 +130,14 @@ public class LoginPage extends AppCompatActivity {
         startActivity(forgotPassword);
     }
 
+    public void registrationPageTransition(View view) {
+        Intent regIntent = new Intent(this, RegistrationPage.class);
+        startActivity(regIntent);
+    }
+
     public void mainPageTransition(View view) {
-        Intent mainIntent = new Intent(this, MainPage.class);
-        mainIntent.putExtra("username", usernameDB);
-        mainIntent.putExtra("name", database.getName(usernameDB));
         errorExists = 0;
-        if(checkValidity()==0 && checkDatabase()==0)
-            startActivity(mainIntent);
+        if(checkValidity()==0)
+            checkDatabase();
     }
 }
